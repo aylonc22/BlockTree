@@ -19,7 +19,7 @@ public class Block {
     }
 
     // Method to calculate the block's hash based on the previous block's hash and timestamp
-    private String calculateBlockHash() {
+    public String calculateBlockHash() {
         String dataToHash = previousBlockHash + timestamp + bPlusTree.hashCode();
         return String.valueOf(dataToHash.hashCode());
     }
