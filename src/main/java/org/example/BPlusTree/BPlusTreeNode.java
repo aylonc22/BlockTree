@@ -1,5 +1,7 @@
 package org.example.BPlusTree;
 
+import org.example.Config.Config;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +51,10 @@ public class BPlusTreeNode {
      * @return The size of the node in bytes.
      */
     public int getSize() {
-        int keySize = 4; // Assuming integer keys
-        int offsetSize = 4; // Assuming integer offsets
-        int valueSize = 50; // Adjust based on max value length
-        int nextLeaf = 4;
+        int keySize = Config.keySize; // Size of each key
+        int offsetSize = Config.offsetSize; // Size of each offset
+        int valueSize = Config.valueSize; // Maximum size of each value (adjust as needed)
+        int nextLeaf = Config.nextLeaf;
         int maxKeys = order - 1; // Maximum number of keys
         int nodeSize;
 

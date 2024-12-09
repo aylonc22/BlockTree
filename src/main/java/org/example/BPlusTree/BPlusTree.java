@@ -1,5 +1,7 @@
 package org.example.BPlusTree;
 
+import org.example.Config.Config;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.*;
@@ -106,10 +108,10 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
     private int allocateNode(boolean isLeaf) {
         // Calculate the size of a node based on the order
         int maxKeys = order - 1; // Maximum number of keys in the node
-        int keySize = 4; // Size of each key (assuming integer keys)
-        int offsetSize = 4; // Size of each offset (assuming integer offsets)
-        int valueSize = 50; // Maximum size of each value (adjust as needed)
-        int nextLeaf = 4;
+        int keySize = Config.keySize; // Size of each key (assuming integer keys)
+        int offsetSize = Config.offsetSize; // Size of each offset (assuming integer offsets)
+        int valueSize = Config.valueSize; // Maximum size of each value (adjust as needed)
+        int nextLeaf = Config.nextLeaf;
 
         int nodeSize;
         if (isLeaf) {
