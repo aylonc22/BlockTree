@@ -5,11 +5,11 @@ import org.example.Transaction.Transaction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Blockchain {
+public class BlockChain {
 
     private List<Block> chain;
 
-    public Blockchain() {
+    public BlockChain() {
         chain = new ArrayList<>();
         chain.add(createGenesisBlock());
     }
