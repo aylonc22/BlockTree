@@ -1,4 +1,4 @@
-package org.example.Transaction;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Transaction {
     public String sender;
@@ -19,6 +19,15 @@ public class Transaction {
         return String.format("%x", (sender + recipient + amount + timestamp).hashCode());
     }
 
+    public String toJson() {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.writeValueAsString(this);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to serialize transaction to JSON", e);
+        }
+    }
+
     @Override
     public String toString() {
         return "Transaction{" +
@@ -30,4 +39,3 @@ public class Transaction {
                 '}';
     }
 }
-
