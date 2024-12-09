@@ -8,7 +8,7 @@ import java.util.*;
  * A B+ Tree implementation with an arena allocator for efficient memory management.
  * The B+ Tree supports insertion, deletion, and search operations.
  */
-public class BPlusTree {
+public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
     private static final int DEFAULT_ORDER = 3; // Default order (maximum number of children per node)
     private static final int DEFAULT_MB = 1; // Default memory size (in megabytes) for the tree
     private ByteBuffer buffer; // Byte buffer to store the serialized nodes
@@ -44,7 +44,60 @@ public class BPlusTree {
         this.root = new BPlusTreeNode(true, allocateNode(true),order);
         serializeNode(root);
     }
+    @Override
+    public Iterator<Map.Entry<Integer, String>> iterator() {
+        return new Iterator<Map.Entry<Integer, String>>() {
+            private BPlusTreeNode currentLeaf = findLeftmostLeaf(root);  // Start at the leftmost leaf
+            private int currentIndex = 0;  // Current index in the leaf node
 
+            @Override
+            public boolean hasNext() {
+                // Check if there are more elements to iterate over.
+                return currentLeaf != null && (currentIndex < currentLeaf.keys.size() || currentLeaf.nextLeaf != null);
+            }
+
+            @Override
+            public Map.Entry<Integer, String> next() {
+                if (!hasNext()) {
+                    throw new NoSuchElementException("No more elements in the tree.");
+                }
+
+                // Get the current key-value pair
+                int key = currentLeaf.keys.get(currentIndex);
+                String value = currentLeaf.values.get(currentIndex);
+                Map.Entry<Integer, String> entry = new AbstractMap.SimpleEntry<>(key, value);
+
+                // Move to the next index, or to the next leaf if necessary
+                currentIndex++;
+                if (currentIndex >= currentLeaf.keys.size()) {
+                    currentLeaf = currentLeaf.nextLeaf;  // Move to the next leaf
+                    currentIndex = 0;
+                }
+
+                return entry;
+            }
+
+            // Find the leftmost leaf node starting from the root
+            private BPlusTreeNode findLeftmostLeaf(BPlusTreeNode node) {
+                while (!node.isLeaf) {
+                    // Traverse down to the leftmost child
+                    node = BPlusTreeNode.deserialize(buffer,  node.childrenOffsets.get(0),order);
+                }
+                return node;
+            }
+        };
+    }
+
+    // Generate the hashcode based on the tree’s contents
+    @Override
+    public int hashCode() {
+        int result = 1;
+        for (Map.Entry<Integer, String> entry : this) {
+            result = 31 * result + (entry.getKey() ^ (entry.getKey() >>> 32));
+            result = 31 * result + (entry.getValue() == null ? 0 : entry.getValue().hashCode());
+        }
+        return result;
+    }
     /**
      * Allocate space for a new node in the buffer.
      *
@@ -56,11 +109,12 @@ public class BPlusTree {
         int keySize = 4; // Size of each key (assuming integer keys)
         int offsetSize = 4; // Size of each offset (assuming integer offsets)
         int valueSize = 15; // Maximum size of each value (adjust as needed)
+        int nextLeaf = 4;
 
         int nodeSize;
         if (isLeaf) {
             // Size calculation for leaf nodes
-            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize);
+            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize) + nextLeaf;
         } else {
             // Size calculation for internal nodes
             nodeSize = (maxKeys * keySize) + ((order * offsetSize) + (offsetSize * (maxKeys + 1)));
@@ -173,6 +227,10 @@ public class BPlusTree {
         leaf.keys = new ArrayList<>(allKeys.subList(0, t + 1));
         leaf.values = new ArrayList<>(allValues.subList(0, t + 1));
 
+
+        // Update the nextLeaf pointers after splitting
+        newLeaf.nextLeaf = leaf.nextLeaf;  // The new leaf points to the next leaf node (if any)
+        leaf.nextLeaf = newLeaf;  // The old leaf points to the new leaf node
         // Update the root if necessary
         if (leaf == root) {
             BPlusTreeNode newRoot = new BPlusTreeNode(false, allocateNode(false),order);
@@ -403,7 +461,7 @@ public class BPlusTree {
         serializeNode(leftSibling);
         serializeNode(parent);
 
-        // Handle the case where the parent node becomes underflowed
+        // Handle the case where the parent node becomes underflow
         if (parent.keys.size() < (order - 1) / 2 && parent != root) {
             handleUnderflow(parent);
         }
@@ -442,7 +500,7 @@ public class BPlusTree {
         serializeNode(node);
         serializeNode(parent);
 
-        // Handle the case where parent node becomes underflowed
+        // Handle the case where parent node becomes underflow
         if (parent.keys.size() < (order - 1) / 2 && parent != root) {
             handleUnderflow(parent);
         }

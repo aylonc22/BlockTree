@@ -11,14 +11,16 @@ public class BPlusTreeNode {
     public List<Integer> childrenOffsets; // Only for internal nodes
     public int offset;
     public final int order;
+    public BPlusTreeNode nextLeaf; // Points to the next leaf node (only used in leaf nodes)
 
-    public BPlusTreeNode(boolean isLeaf, int offset,int order) {
+    public BPlusTreeNode(boolean isLeaf, int offset, int order) {
         this.isLeaf = isLeaf;
         this.keys = new ArrayList<>();
         this.values = new ArrayList<>();
         this.childrenOffsets = new ArrayList<>();
         this.offset = offset;
         this.order = order;
+        this.nextLeaf = null; // Default to null
     }
 
     @Override
@@ -31,6 +33,7 @@ public class BPlusTreeNode {
                 ", offset=" + offset +
                 '}';
     }
+
     /**
      * Calculate the end offset of the node in the ByteBuffer.
      *
@@ -55,7 +58,7 @@ public class BPlusTreeNode {
 
         if (isLeaf) {
             // Size calculation for leaf nodes
-            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize);
+            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize) + 4; // Adding space for nextLeaf pointer (4 bytes)
         } else {
             // Size calculation for internal nodes
             nodeSize = (maxKeys * keySize) + (order * offsetSize) + (offsetSize * (maxKeys + 1));
@@ -64,12 +67,11 @@ public class BPlusTreeNode {
         return nodeSize;
     }
 
-    public static BPlusTreeNode deserialize(ByteBuffer buffer, int offset,int order) {
-        //System.out.println("deserializing node at offset " + offset);
-
+    public static BPlusTreeNode deserialize(ByteBuffer buffer, int offset, int order) {
+        // System.out.println("deserializing node at offset " + offset);
         buffer.position(offset);
         boolean isLeaf = buffer.get() == 1;
-        BPlusTreeNode node = new BPlusTreeNode(isLeaf, offset,order);
+        BPlusTreeNode node = new BPlusTreeNode(isLeaf, offset, order);
 
         int keyCount = buffer.getInt();
         for (int i = 0; i < keyCount; i++) {
@@ -83,20 +85,25 @@ public class BPlusTreeNode {
                 buffer.get(valueBytes);
                 node.values.add(new String(valueBytes));
             }
+
+            int nextLeafOffset = buffer.getInt();  // Offset of the next leaf node
+            // For leaf nodes, deserialize the nextLeaf pointer (if it exists)
+            if (nextLeafOffset != -1) {
+                node.nextLeaf = deserialize(buffer, nextLeafOffset, order);
+            }
+
         } else {
             for (int i = 0; i <= keyCount; i++) {
                 node.childrenOffsets.add(buffer.getInt());
             }
         }
 
-            //System.out.println(node);
-
-
+        // System.out.println(node);
         return node;
     }
 
     public void serialize(ByteBuffer buffer) {
-        //System.out.print("Serializing node with " + keys.size() + " keys at offset " + buffer.position());
+        // System.out.print("Serializing node with " + keys.size() + " keys at offset " + buffer.position());
         buffer.put((byte) (isLeaf ? 1 : 0));
         buffer.putInt(keys.size());
         for (int key : keys) {
@@ -109,18 +116,18 @@ public class BPlusTreeNode {
                 buffer.putInt(valueBytes.length);
                 buffer.put(valueBytes);
             }
+
+            // Serialize the nextLeaf pointer (if exists)
+            if (nextLeaf != null) {
+                buffer.putInt(nextLeaf.offset);  // Assuming you store the next leaf's offset
+            } else {
+                buffer.putInt(-1);  // Indicating no next leaf
+            }
+
         } else {
             for (int offset : childrenOffsets) {
                 buffer.putInt(offset);
             }
         }
-        //System.out.println(" serializing end at offset " +buffer.position() +" and the end buffer offset is " + getEndOffset());
-
-           // System.out.println(this);
-
     }
 }
-
-
-
-
