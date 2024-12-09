@@ -1,79 +1,56 @@
 package org.example.BlockChain;
 import org.example.BPlusTree.BPlusTree;
+import org.example.Transaction.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockChain {
-    private List<Block> chain;  // List to store the blocks in the blockchain
+public class Blockchain {
 
-    // Constructor
-    public BlockChain() {
+    private List<Block> chain;
+
+    public Blockchain() {
         chain = new ArrayList<>();
-        // Initialize the blockchain with the genesis block (first block)
-        Block genesisBlock = createGenesisBlock();
-        chain.add(genesisBlock);
+        chain.add(createGenesisBlock());
     }
 
-    // Method to create the genesis block (the first block)
     private Block createGenesisBlock() {
-        // The previous block hash for the genesis block is typically "0" or null
-        BPlusTree genesisTree = new BPlusTree();
-        return new Block("0", genesisTree);
+        // The first block (genesis block) doesn't have any previous hash
+        return new Block(null);
     }
 
-    // Method to add a block to the blockchain
-    public void addBlock(BPlusTree bPlusTree) {
+    // Check if the current block is full
+    private boolean isCurrentBlockFull() {
+        Block currentBlock = chain.get(chain.size() - 1);
+        return currentBlock.getTransactions().lastAllocatedEndOffset >= Block.MAX_BLOCK_SIZE;
+    }
+
+    // Add a transaction to the blockchain
+    public void addTransaction(Transaction transaction) {
+        // Check if the current block is full
+        if (isCurrentBlockFull()) {
+            createNewBlock();  // Create a new block if the current one is full
+        }
+
+        // Add the transaction to the B+ Tree of the last block
+        Block lastBlock = chain.get(chain.size() - 1);
+        lastBlock.addTransaction(transaction);
+    }
+
+    // Create a new block and add it to the blockchain
+    private void createNewBlock() {
         Block previousBlock = chain.get(chain.size() - 1);
-        String previousBlockHash = previousBlock.getBlockHash();
-        Block newBlock = new Block(previousBlockHash, bPlusTree);
+        Block newBlock = new Block(previousBlock.getBlockHash());
         chain.add(newBlock);
     }
 
-    // Method to get the latest block in the blockchain
-    public Block getLatestBlock() {
-        return chain.get(chain.size() - 1);
-    }
-
-    // Method to validate the blockchain (ensure integrity)
-    public boolean validateBlockchain() {
-        for (int i = 1; i < chain.size(); i++) {
-            Block currentBlock = chain.get(i);
-            Block previousBlock = chain.get(i - 1);
-
-            // Check if the previous block hash matches the previous block's hash
-            if (!currentBlock.getPreviousBlockHash().equals(previousBlock.getBlockHash())) {
-                return false; // Blockchain is invalid
-            }
-
-            // Check if the current block's hash matches its calculated hash
-            if (!currentBlock.getBlockHash().equals(currentBlock.calculateBlockHash())) {
-                return false; // Blockchain is invalid
-            }
-        }
-        return true; // Blockchain is valid
-    }
-
-    // Method to retrieve a block by its hash (could be useful for querying)
-    public Block getBlockByHash(String blockHash) {
-        for (Block block : chain) {
-            if (block.getBlockHash().equals(blockHash)) {
-                return block;
-            }
-        }
-        return null; // Block not found
-    }
-
-    // Method to print the blockchain (for debugging purposes)
-    public void printBlockchain() {
-        for (Block block : chain) {
-            System.out.println("Block Hash: " + block.getBlockHash());
-            System.out.println("Previous Block Hash: " + block.getPreviousBlockHash());
-            System.out.println("Timestamp: " + block.getTimestamp());
-            System.out.println("B+ Tree: " + block.getBPlusTree());  // Print the B+ Tree stored in the block
-            System.out.println("--------------------------------------");
-        }
+    @Override
+    public String toString() {
+        return "Blockchain{" +
+                "chain=" + chain +
+                '}';
     }
 }
+
 
 

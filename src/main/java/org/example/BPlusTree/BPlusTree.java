@@ -14,7 +14,7 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
     private ByteBuffer buffer; // Byte buffer to store the serialized nodes
     private BPlusTreeNode root; // Root node of the B+ Tree
     private int order; // Order of the B+ Tree
-    private int lastAllocatedEndOffset = -1;
+    public int lastAllocatedEndOffset = -1;
     private Set<Integer> printedOffsets = new HashSet<>();
     /**
      * Default constructor initializing the B+ Tree with default memory size and order.
@@ -108,7 +108,7 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
         int maxKeys = order - 1; // Maximum number of keys in the node
         int keySize = 4; // Size of each key (assuming integer keys)
         int offsetSize = 4; // Size of each offset (assuming integer offsets)
-        int valueSize = 15; // Maximum size of each value (adjust as needed)
+        int valueSize = 50; // Maximum size of each value (adjust as needed)
         int nextLeaf = 4;
 
         int nodeSize;

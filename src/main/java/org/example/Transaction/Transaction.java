@@ -1,3 +1,4 @@
+package org.example.Transaction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Transaction {
@@ -5,7 +6,7 @@ public class Transaction {
     public String recipient;
     public double amount;
     public long timestamp;
-    public String transactionHash;
+    public int transactionHash;
 
     public Transaction(String sender, String recipient, double amount, long timestamp) {
         this.sender = sender;
@@ -15,8 +16,8 @@ public class Transaction {
         this.transactionHash = generateTransactionHash();
     }
 
-    private String generateTransactionHash() {
-        return String.format("%x", (sender + recipient + amount + timestamp).hashCode());
+    private int generateTransactionHash() {
+        return (sender + recipient + amount + timestamp).hashCode();
     }
 
     public String toJson() {

@@ -51,14 +51,14 @@ public class BPlusTreeNode {
     public int getSize() {
         int keySize = 4; // Assuming integer keys
         int offsetSize = 4; // Assuming integer offsets
-        int valueSize = 15; // Adjust based on max value length
-
+        int valueSize = 50; // Adjust based on max value length
+        int nextLeaf = 4;
         int maxKeys = order - 1; // Maximum number of keys
         int nodeSize;
 
         if (isLeaf) {
             // Size calculation for leaf nodes
-            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize) + 4; // Adding space for nextLeaf pointer (4 bytes)
+            nodeSize = (maxKeys * keySize) + (maxKeys * valueSize) + nextLeaf; // Adding space for nextLeaf pointer (4 bytes)
         } else {
             // Size calculation for internal nodes
             nodeSize = (maxKeys * keySize) + (order * offsetSize) + (offsetSize * (maxKeys + 1));
