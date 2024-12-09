@@ -23,6 +23,7 @@ The goal is to build a blockchain platform that efficiently manages the state of
 ### Transaction Processing
 - **Validation**: Implement transaction validation logic to ensure that only valid transactions are added to the blockchain. This includes checks for account balances, signatures, and double spending.
 - **State Updates**: Upon validating a transaction, update the corresponding entries in the B+ tree to reflect the new account states.
+- **Transaction Format**: Each transaction is stored as a **JSON** object, which contains all the relevant details (e.g., sender, recipient, amount, timestamp). This allows for flexible transaction data storage and easy serialization/deserialization.
 
 ### Consensus Mechanism
 - **Proof of Work (PoW) or Proof of Stake (PoS)**: Choose a consensus algorithm to ensure all nodes in the network agree on the state of the blockchain. Implement this alongside the B+ tree for block and transaction management.
@@ -31,9 +32,21 @@ The goal is to build a blockchain platform that efficiently manages the state of
 - **Peer-to-Peer Network**: Create a simple P2P network for nodes to communicate and share blocks. Implement mechanisms for propagating transactions and blocks across the network.
 - **Node Discovery**: Develop a method for nodes to discover each other and maintain a list of active peers.
 
+### Security Considerations
+- **Hashing Algorithm**: For demonstration purposes, basic `int` hashcodes are used to generate transaction identifiers. However, a more secure hashing algorithm, such as **MD5** (or a more modern cryptographic hash function), is recommended as a future improvement to ensure the integrity and security of the blockchain.
+
 ### Testing and Benchmarking
 - **Performance Metrics**: Implement benchmarking tools to measure transaction throughput, block validation time, and memory usage. This will help evaluate the efficiency of the B+ tree and arena allocator in practice.
 - **Load Testing**: Simulate high transaction volumes to assess how the system scales under stress and to identify potential bottlenecks.
+
+## Improvement Opportunities
+
+There are wide possibilities for **improvements** and **enhancements** within BlockTree. These include:
+
+- **Data Management and Storage**: The current data management system could be further optimized to handle larger datasets efficiently. The transaction storage, particularly in the B+ tree, can be improved to better manage byte-level storage and minimize memory overhead.
+- **Security Enhancements**: The current basic `int` hashcode approach for transaction identifiers should be replaced with a more secure cryptographic hashing algorithm (e.g., **MD5**, **SHA-256**, etc.) in future versions.
+- **Smart Contract Support**: Introducing support for **smart contracts** can extend the platform’s capability to execute more complex logic and automate processes directly on the blockchain.
+- **Scalability**: Future work can focus on **horizontal scalability** of the blockchain, enhancing its ability to handle a larger number of transactions and users while maintaining low latency and high throughput.
 
 ## Potential Challenges
 - **Complexity of State Management**: Ensuring the state tree remains consistent across distributed nodes can be complex, especially during forks or network partitions.
