@@ -587,4 +587,55 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
             }
         }
     }
+    @Override
+    public String toString() {
+        // Clear the set of printed offsets to ensure a fresh start for converting the tree to a string.
+        printedOffsets.clear();
+        // Use StringBuilder to build the result and start recursion from the root node.
+        StringBuilder sb = new StringBuilder();
+        toString(root, "", null, sb);
+        return sb.toString();
+    }
+
+    /**
+     * Build the string representation of the B+ Tree.
+     *
+     * @param node The starting node (usually the root).
+     * @param indent The indentation for tree levels.
+     * @param parentOffset The offset of the parent node, used to show parent-child relationships.
+     * @param sb The StringBuilder to accumulate the result.
+     */
+    private void toString(BPlusTreeNode node, String indent, Integer parentOffset, StringBuilder sb) {
+        // Check if this node has already been processed
+        if (printedOffsets.contains(node.offset)) {
+            return; // Skip processing if already processed
+        }
+
+        // Add node type, offset, and keys to the string builder
+        String nodeType = node.isLeaf ? "Leaf" : "Internal";
+        sb.append(indent).append(nodeType).append(" Node (Offset: ").append(node.offset).append("):\n");
+        sb.append(indent).append("  Keys: ").append(node.keys).append("\n");
+        if (node.isLeaf) {
+            sb.append(indent).append("  Values: ").append(node.values).append("\n");
+        } else {
+            sb.append(indent).append("  Children Offsets: ").append(node.childrenOffsets).append("\n");
+        }
+
+        // Append the parent-child relationship if a parentOffset is provided
+        if (parentOffset != null) {
+            sb.append(indent).append("  Parent Offset: ").append(parentOffset).append("\n");
+        }
+
+        // Mark this node as processed
+        printedOffsets.add(node.offset);
+
+        // Recursively process child nodes for internal nodes
+        if (!node.isLeaf) {
+            for (Integer offset : node.childrenOffsets) {
+                BPlusTreeNode child = BPlusTreeNode.deserialize(buffer, offset, order);
+                toString(child, indent + "  ", node.offset, sb);
+            }
+        }
+    }
+
 }

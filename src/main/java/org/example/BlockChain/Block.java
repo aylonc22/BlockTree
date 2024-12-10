@@ -10,7 +10,7 @@ public class Block {
     private String blockHash;          // Unique hash of the block
     private long timestamp;            // Block creation timestamp
     private BPlusTree transactions;       // B+ Tree to store key-value pairs in the block
-    public static final int MAX_BLOCK_SIZE = 1024 * 1024; // 1MB
+    public static final int MAX_BLOCK_SIZE = 1; // 1MB
 
     // Constructor
     public Block(String previousBlockHash) {
@@ -44,6 +44,16 @@ public class Block {
 
     public BPlusTree getTransactions() {
         return transactions;
+    }
+
+    @Override
+    public String toString() {
+        return "Block{" +
+                "previousBlockHash='" + previousBlockHash + '\'' +
+                ", blockHash='" + blockHash + '\'' +
+                ", timestamp=" + timestamp +
+                ", transactions=" + transactions.toString() +
+                '}';
     }
 }
 
