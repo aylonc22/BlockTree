@@ -10,7 +10,7 @@ import java.util.*;
  * A B+ Tree implementation with an arena allocator for efficient memory management.
  * The B+ Tree supports insertion, deletion, and search operations.
  */
-public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
+public class BPlusTree<T extends Comparable<T>> implements Iterable<Map.Entry<String, String>> {
     private static final int DEFAULT_ORDER = 3; // Default order (maximum number of children per node)
     private static final int DEFAULT_MB = 1; // Default memory size (in megabytes) for the tree
     private ByteBuffer buffer; // Byte buffer to store the serialized nodes
@@ -47,8 +47,8 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
         serializeNode(root);
     }
     @Override
-    public Iterator<Map.Entry<Integer, String>> iterator() {
-        return new Iterator<Map.Entry<Integer, String>>() {
+    public Iterator<Map.Entry<String, String>> iterator() {
+        return new Iterator<Map.Entry<String, String>>() {
             private BPlusTreeNode currentLeaf = findLeftmostLeaf(root);  // Start at the leftmost leaf
             private int currentIndex = 0;  // Current index in the leaf node
 
@@ -59,15 +59,15 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
             }
 
             @Override
-            public Map.Entry<Integer, String> next() {
+            public Map.Entry<String, String> next() {
                 if (!hasNext()) {
                     throw new NoSuchElementException("No more elements in the tree.");
                 }
 
                 // Get the current key-value pair
-                int key = currentLeaf.keys.get(currentIndex);
-                String value = currentLeaf.values.get(currentIndex);
-                Map.Entry<Integer, String> entry = new AbstractMap.SimpleEntry<>(key, value);
+                String key = (String) currentLeaf.keys.get(currentIndex);
+                String value = (String) currentLeaf.values.get(currentIndex);
+                Map.Entry<String, String> entry = new AbstractMap.SimpleEntry<>(key, value);
 
                 // Move to the next index, or to the next leaf if necessary
                 currentIndex++;
@@ -80,7 +80,7 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
             }
 
             // Find the leftmost leaf node starting from the root
-            private BPlusTreeNode findLeftmostLeaf(BPlusTreeNode node) {
+            private BPlusTreeNode<String> findLeftmostLeaf(BPlusTreeNode<String> node) {
                 while (!node.isLeaf) {
                     // Traverse down to the leftmost child
                     node = BPlusTreeNode.deserialize(buffer,  node.childrenOffsets.get(0),order);
@@ -94,7 +94,7 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
     @Override
     public int hashCode() {
         int result = 1;
-        for (Map.Entry<Integer, String> entry : this) {
+        for (Map.Entry<String, String> entry : this) {
             result = 31 * result + (entry.getKey() ^ (entry.getKey() >>> 32));
             result = 31 * result + (entry.getValue() == null ? 0 : entry.getValue().hashCode());
         }
@@ -589,6 +589,7 @@ public class BPlusTree implements Iterable<Map.Entry<Integer, String>> {
     }
     @Override
     public String toString() {
+        printTree();
         // Clear the set of printed offsets to ensure a fresh start for converting the tree to a string.
         printedOffsets.clear();
         // Use StringBuilder to build the result and start recursion from the root node.

@@ -22,7 +22,7 @@ public class BlockChain {
     // Check if the current block is full
     private boolean isCurrentBlockFull() {
         Block currentBlock = chain.get(chain.size() - 1);
-        return currentBlock.getTransactions().lastAllocatedEndOffset >= Block.MAX_BLOCK_SIZE;
+        return currentBlock.getTransactions().lastAllocatedEndOffset >= (1024 * 1024) * Block.MAX_BLOCK_SIZE;
     }
 
     // Add a transaction to the blockchain

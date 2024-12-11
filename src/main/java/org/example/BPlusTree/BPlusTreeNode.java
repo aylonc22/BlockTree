@@ -6,9 +6,9 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BPlusTreeNode {
+public class BPlusTreeNode<T extends Comparable<T>> {
     public boolean isLeaf;
-    public List<Integer> keys;
+    public List<T> keys;
     public List<String> values; // Only for leaf nodes
     public List<Integer> childrenOffsets; // Only for internal nodes
     public int offset;
