@@ -1,3 +1,4 @@
+import com.sun.jdi.InvalidTypeException;
 import org.example.BlockChain.BlockChain;
 import org.example.Transaction.Transaction;
 import org.junit.Test;
@@ -6,7 +7,7 @@ import java.util.ArrayList;
 
 public class BlockChainTest {
     @Test
-    public void  testInit(){
+    public void  testInit() throws InvalidTypeException {
         var chain = new BlockChain();
         var transactions = new ArrayList<Transaction>();
         for(int i=0;i<10;i++){

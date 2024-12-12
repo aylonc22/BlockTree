@@ -1,5 +1,6 @@
 package org.example.BlockChain;
 
+import com.sun.jdi.InvalidTypeException;
 import org.example.BPlusTree.BPlusTree;
 import org.example.Transaction.Transaction;
 
@@ -9,14 +10,14 @@ public class Block {
     private String previousBlockHash;  // Link to the previous block
     private String blockHash;          // Unique hash of the block
     private long timestamp;            // Block creation timestamp
-    private BPlusTree transactions;       // B+ Tree to store key-value pairs in the block
+    private BPlusTree<String> transactions;       // B+ Tree to store key-value pairs in the block
     public static final int MAX_BLOCK_SIZE = 1; // 1MB
 
     // Constructor
-    public Block(String previousBlockHash) {
+    public Block(String previousBlockHash) throws InvalidTypeException {
         this.previousBlockHash = previousBlockHash;
         this.timestamp = Instant.now().getEpochSecond();
-        this.transactions = new BPlusTree(MAX_BLOCK_SIZE,3);
+        this.transactions = new BPlusTree<>(MAX_BLOCK_SIZE,3,String.class);
         this.blockHash = calculateBlockHash();  // Calculate the block's hash
     }
 
@@ -25,8 +26,8 @@ public class Block {
         String dataToHash = previousBlockHash + timestamp + transactions.hashCode();
         return String.valueOf(dataToHash.hashCode());
     }
-    public void addTransaction(Transaction transaction){
-        this.transactions.insert(transaction.transactionHash,transaction.toJson());
+    public void addTransaction(Transaction transaction) throws InvalidTypeException {
+        this.transactions.insert(String.valueOf(transaction.transactionHash),transaction.toJson());
     }
 
     // Getters

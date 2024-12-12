@@ -1,4 +1,5 @@
 package org.example.BlockChain;
+import com.sun.jdi.InvalidTypeException;
 import org.example.BPlusTree.BPlusTree;
 import org.example.Transaction.Transaction;
 
@@ -9,12 +10,12 @@ public class BlockChain {
 
     private List<Block> chain;
 
-    public BlockChain() {
+    public BlockChain() throws InvalidTypeException {
         chain = new ArrayList<>();
         chain.add(createGenesisBlock());
     }
 
-    private Block createGenesisBlock() {
+    private Block createGenesisBlock() throws InvalidTypeException {
         // The first block (genesis block) doesn't have any previous hash
         return new Block(null);
     }
@@ -26,7 +27,7 @@ public class BlockChain {
     }
 
     // Add a transaction to the blockchain
-    public void addTransaction(Transaction transaction) {
+    public void addTransaction(Transaction transaction) throws InvalidTypeException {
         // Check if the current block is full
         if (isCurrentBlockFull()) {
             createNewBlock();  // Create a new block if the current one is full
@@ -38,7 +39,7 @@ public class BlockChain {
     }
 
     // Create a new block and add it to the blockchain
-    private void createNewBlock() {
+    private void createNewBlock() throws InvalidTypeException {
         Block previousBlock = chain.get(chain.size() - 1);
         Block newBlock = new Block(previousBlock.getBlockHash());
         chain.add(newBlock);

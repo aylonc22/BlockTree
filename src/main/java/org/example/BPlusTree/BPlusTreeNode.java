@@ -1,5 +1,6 @@
 package org.example.BPlusTree;
 
+import com.sun.jdi.InvalidTypeException;
 import org.example.Config.Config;
 
 import java.nio.ByteBuffer;
@@ -13,7 +14,7 @@ public class BPlusTreeNode<T extends Comparable<T>> {
     public List<Integer> childrenOffsets; // Only for internal nodes
     public int offset;
     public final int order;
-    public BPlusTreeNode nextLeaf; // Points to the next leaf node (only used in leaf nodes)
+    public BPlusTreeNode<T> nextLeaf; // Points to the next leaf node (only used in leaf nodes)
 
     public BPlusTreeNode(boolean isLeaf, int offset, int order) {
         this.isLeaf = isLeaf;
@@ -69,15 +70,23 @@ public class BPlusTreeNode<T extends Comparable<T>> {
         return nodeSize;
     }
 
-    public static BPlusTreeNode deserialize(ByteBuffer buffer, int offset, int order) {
+    public static <T extends Comparable<T>> BPlusTreeNode<T> deserialize(ByteBuffer buffer, int offset, int order,Class<T> type){
         // System.out.println("deserializing node at offset " + offset);
         buffer.position(offset);
         boolean isLeaf = buffer.get() == 1;
-        BPlusTreeNode node = new BPlusTreeNode(isLeaf, offset, order);
+
+        BPlusTreeNode<T> node = new BPlusTreeNode<>(isLeaf, offset, order);
 
         int keyCount = buffer.getInt();
         for (int i = 0; i < keyCount; i++) {
-            node.keys.add(buffer.getInt());
+           if(type == Integer.class)
+                node.keys.add(type.cast(buffer.getInt()));
+           else{
+               int keyLength = buffer.getInt();
+               byte[] keyBytes = new byte[keyLength];
+               buffer.get(keyBytes);
+               node.keys.add(type.cast(new String(keyBytes)));
+           }
         }
 
         if (isLeaf) {
@@ -91,7 +100,7 @@ public class BPlusTreeNode<T extends Comparable<T>> {
             int nextLeafOffset = buffer.getInt();  // Offset of the next leaf node
             // For leaf nodes, deserialize the nextLeaf pointer (if it exists)
             if (nextLeafOffset != -1) {
-                node.nextLeaf = deserialize(buffer, nextLeafOffset, order);
+                node.nextLeaf = deserialize(buffer, nextLeafOffset, order,type);
             }
 
         } else {
@@ -104,12 +113,22 @@ public class BPlusTreeNode<T extends Comparable<T>> {
         return node;
     }
 
-    public void serialize(ByteBuffer buffer) {
+    public void serialize(ByteBuffer buffer) throws InvalidTypeException {
         // System.out.print("Serializing node with " + keys.size() + " keys at offset " + buffer.position());
         buffer.put((byte) (isLeaf ? 1 : 0));
         buffer.putInt(keys.size());
-        for (int key : keys) {
-            buffer.putInt(key);
+        for (T key : keys) {
+           if(key instanceof Integer) {
+               buffer.putInt((Integer) key);
+           }
+           else if(key instanceof String){
+               byte[] keyBytes = ((String) key).getBytes();
+               buffer.putInt(keyBytes.length);
+               buffer.put(keyBytes);
+           }
+           else {
+               throw new InvalidTypeException("Unsupported key type");
+           }
         }
 
         if (isLeaf) {
