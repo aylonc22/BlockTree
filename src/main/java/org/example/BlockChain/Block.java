@@ -3,7 +3,9 @@ package org.example.BlockChain;
 import com.sun.jdi.InvalidTypeException;
 import org.example.BPlusTree.BPlusTree;
 import org.example.Transaction.Transaction;
+import org.example.Util.HashUtil;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 public class Block {
@@ -14,7 +16,7 @@ public class Block {
     public static final int MAX_BLOCK_SIZE = 1; // 1MB
 
     // Constructor
-    public Block(String previousBlockHash) throws InvalidTypeException {
+    public Block(String previousBlockHash) throws InvalidTypeException, NoSuchAlgorithmException {
         this.previousBlockHash = previousBlockHash;
         this.timestamp = Instant.now().getEpochSecond();
         this.transactions = new BPlusTree<>(MAX_BLOCK_SIZE,3,String.class);
@@ -22,9 +24,9 @@ public class Block {
     }
 
     // Method to calculate the block's hash based on the previous block's hash and timestamp
-    public String calculateBlockHash() {
-        String dataToHash = previousBlockHash + timestamp + transactions.hashCode();
-        return String.valueOf(dataToHash.hashCode());
+    public String calculateBlockHash() throws NoSuchAlgorithmException {
+        String dataToHash = previousBlockHash + timestamp + transactions.generateHashCode();
+        return HashUtil.computeSha256(String.valueOf(dataToHash.hashCode()));
     }
     public void addTransaction(Transaction transaction) throws InvalidTypeException {
         this.transactions.insert(String.valueOf(transaction.transactionHash),transaction.toJson());

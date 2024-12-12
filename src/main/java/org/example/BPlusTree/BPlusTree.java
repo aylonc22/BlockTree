@@ -2,9 +2,11 @@ package org.example.BPlusTree;
 
 import com.sun.jdi.InvalidTypeException;
 import org.example.Config.Config;
+import org.example.Util.HashUtil;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -107,8 +109,7 @@ public class BPlusTree<T extends Comparable<T>> implements Iterable<Map.Entry<T,
     }
 
     // Generate the hashcode based on the tree’s contents
-    @Override
-    public int hashCode() {
+    public String generateHashCode() throws NoSuchAlgorithmException {
         int result = 1;
         for (Map.Entry<T, String> entry : this) {
             // Hashing the key
@@ -117,7 +118,7 @@ public class BPlusTree<T extends Comparable<T>> implements Iterable<Map.Entry<T,
             // Hashing the value (String)
             result = 31 * result + (entry.getValue() == null ? 0 : entry.getValue().hashCode());
         }
-        return result;
+            return HashUtil.computeSha256(String.valueOf(result));
     }
 
     /**
@@ -670,11 +671,6 @@ public class BPlusTree<T extends Comparable<T>> implements Iterable<Map.Entry<T,
     }
     @Override
     public String toString() {
-        try {
-            printTree();
-        } catch (InvalidTypeException e) {
-            throw new RuntimeException(e);
-        }
         // Clear the set of printed offsets to ensure a fresh start for converting the tree to a string.
         printedOffsets.clear();
         // Use StringBuilder to build the result and start recursion from the root node.

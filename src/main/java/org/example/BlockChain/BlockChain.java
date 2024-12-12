@@ -1,8 +1,8 @@
 package org.example.BlockChain;
 import com.sun.jdi.InvalidTypeException;
-import org.example.BPlusTree.BPlusTree;
 import org.example.Transaction.Transaction;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +10,12 @@ public class BlockChain {
 
     private List<Block> chain;
 
-    public BlockChain() throws InvalidTypeException {
+    public BlockChain() throws InvalidTypeException, NoSuchAlgorithmException {
         chain = new ArrayList<>();
         chain.add(createGenesisBlock());
     }
 
-    private Block createGenesisBlock() throws InvalidTypeException {
+    private Block createGenesisBlock() throws InvalidTypeException, NoSuchAlgorithmException {
         // The first block (genesis block) doesn't have any previous hash
         return new Block(null);
     }
@@ -27,7 +27,7 @@ public class BlockChain {
     }
 
     // Add a transaction to the blockchain
-    public void addTransaction(Transaction transaction) throws InvalidTypeException {
+    public void addTransaction(Transaction transaction) throws InvalidTypeException, NoSuchAlgorithmException {
         // Check if the current block is full
         if (isCurrentBlockFull()) {
             createNewBlock();  // Create a new block if the current one is full
@@ -39,7 +39,7 @@ public class BlockChain {
     }
 
     // Create a new block and add it to the blockchain
-    private void createNewBlock() throws InvalidTypeException {
+    private void createNewBlock() throws InvalidTypeException, NoSuchAlgorithmException {
         Block previousBlock = chain.get(chain.size() - 1);
         Block newBlock = new Block(previousBlock.getBlockHash());
         chain.add(newBlock);
