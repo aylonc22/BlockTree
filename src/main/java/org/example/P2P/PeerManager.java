@@ -15,5 +15,8 @@ public class PeerManager {
     public List<String> getPeers() {
         return peers;
     }
+    public String getBootstrapPeer() {
+        return "localhost:5001"; // Assuming a known peer or bootstrap node
+    }
 }
 

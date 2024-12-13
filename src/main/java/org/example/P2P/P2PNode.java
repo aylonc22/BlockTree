@@ -4,12 +4,13 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 
-public class P2PNode {
+public class P2PNode implements Runnable {
     private static final int PORT = 5000;
     private static ServerSocket serverSocket;
     private static ExecutorService pool = Executors.newCachedThreadPool();
 
-    public static void main(String[] args) {
+    @Override
+    public void run() {
         try {
             serverSocket = new ServerSocket(PORT);
             System.out.println("Server started on port " + PORT);
@@ -53,4 +54,3 @@ public class P2PNode {
         }
     }
 }
-
