@@ -7,6 +7,7 @@ import org.example.Util.HashUtil;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.UUID;
 
 public class Block {
     private String previousBlockHash;  // Link to the previous block
@@ -25,11 +26,13 @@ public class Block {
 
     // Method to calculate the block's hash based on the previous block's hash and timestamp
     public String calculateBlockHash() throws NoSuchAlgorithmException {
-        String dataToHash = previousBlockHash + timestamp + transactions.generateHashCode();
+        String nonce = UUID.randomUUID().toString();
+        String dataToHash = nonce +previousBlockHash + timestamp + transactions.generateHashCode();
         return HashUtil.computeSha256(String.valueOf(dataToHash.hashCode()));
     }
     public void addTransaction(Transaction transaction) throws InvalidTypeException {
-        this.transactions.insert(String.valueOf(transaction.transactionHash),transaction.toJson());
+        this.transactions.insert(String.valueOf(Math.random()),"!");
+       // this.transactions.insert(String.valueOf(transaction.transactionHash),transaction.toJson());
     }
 
     // Getters
@@ -40,7 +43,9 @@ public class Block {
     public String getBlockHash() {
         return blockHash;
     }
-
+    public void setBlockHash(String hash){
+        this.blockHash = hash;
+    }
     public long getTimestamp() {
         return timestamp;
     }

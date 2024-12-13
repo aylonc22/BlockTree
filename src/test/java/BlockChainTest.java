@@ -11,7 +11,7 @@ public class BlockChainTest {
     public void  testInit() throws InvalidTypeException, NoSuchAlgorithmException {
         var chain = new BlockChain();
         var transactions = new ArrayList<Transaction>();
-        for(int i=0;i<3;i++){
+        for(int i=0;i<10;i++){
             transactions.add(new Transaction("aylon","daniel",0.01,System.currentTimeMillis()));
         }
         for(Transaction transaction:transactions){
